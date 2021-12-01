@@ -45,21 +45,46 @@ var graph = {
     ]
 };
 
-function getNeighbors(name, predicate){
+var lists = [
+    {name:"Adam", predicate:"lubi", list: ["Felicity", "Hannah", "Bob"]},
+    {name:"Jerry", predicate:"nepozna", list: ["Felicity"]}
+];
+
+//function pressButton(event) {
+//    
+//}
+
+function showLists(){
+    let result = `<ul>`;
+    lists.forEach((statement, index) => {
+        result += `<li>${statement.name} ${statement.predicate}: ${statement.list}</li>`;
+    });
+    document.body.innerHTML += result + `</ul>`;
+}
+
+function getNeighbors(_name, _predicate){
     return new Promise((resolve, reject)=> {
-        var result = `${name} ${predicate}:\n<ul>`;
-        for (var object in graph.edges){
-            if (graph.edges[object].name === name && graph.edges[object][predicate]){
-                result += `<li>${graph.edges[object][predicate]}</li>`;
+        let result = [];
+        for (let object in graph.edges){
+            if (graph.edges[object].name === _name && graph.edges[object][_predicate]){
+                result.push(graph.edges[object][_predicate])
             }
         }
-        return result+`</ul>`;
+        lists.push({name: _name, predicate: _predicate, list: result})
 
         const error = false;
+        if (error){
+            reject("Error")
+        } else {
+            resolve();
+        }
     });
 }
 
-document.body.innerHTML += getNeighbors("Adam", "lubi");
-document.body.innerHTML += getNeighbors("Carrie", "nepozna");
-document.body.innerHTML += getNeighbors("Sindibad", "lubi");
+//document.body.innerHTML += getNeighbors("Adam", "lubi");
+//document.body.innerHTML += getNeighbors("Carrie", "nepozna");
+//document.body.innerHTML += getNeighbors("Sindibad", "lubi");
 
+getNeighbors("Felicity", "lubi").then(showLists);
+
+//showLists();
