@@ -45,21 +45,67 @@ var graph = {
     ]
 };
 
-var lists = [
-    {name:"Adam", predicate:"lubi", list: ["Felicity", "Hannah", "Bob"]},
-    {name:"Jerry", predicate:"nepozna", list: ["Felicity"]}
-];
+var lists = [];
+var confirmBtn = document.getElementById("confirm");
+var rejectBtn = document.getElementById("reject");
+var okBtn = document.getElementById("ok");
+var testBtn = document.getElementById("test");
 
-//function pressButton(event) {
-//    
-//}
+function enableButtons(bool){
+    document.getElementById("confirm").disabled = !bool;
+    document.getElementById("reject").disabled = !bool;
+}
+function enableInputs(bool){
+    document.getElementById("nodeInput").disabled = !bool;
+    document.getElementById("edgeInput").disabled = !bool;
+}
+
+okBtn.onclick = () => {
+    var node = document.getElementById("nodeInput").value;
+    var edge = document.getElementById("edgeInput").value;
+    var countNeighbors = 0;
+    if (graph.nodes.includes(node)){
+        if (edge === ""){
+            document.getElementById("message").innerHTML = "the edge is necessary to input";
+            enableButtons(false);
+            return 0;
+        }
+        graph.edges.forEach((val) => {
+            if (val.name === node || val.lubi === node || val.nepozna === node){
+                countNeighbors++;
+            }
+        })
+        enableInputs(false);
+        document.getElementById("message").innerHTML = "node info: " + node + " has " + countNeighbors + " neighbors. Do you wish to confirm your action?";    
+        enableButtons(true);
+    } else {
+        document.getElementById("message").innerHTML = "no such node as: " + node;
+        enableButtons(false);
+        return 0;
+    }
+}
+
+confirmBtn.onclick = () => {
+    var node = document.getElementById("nodeInput").value;
+    var edge = document.getElementById("edgeInput").value;
+    getNeighbors(node, edge).then(showLists);
+    enableButtons(false);
+    enableInputs(true);
+    return true;
+}
+rejectBtn.onclick = () => {
+    enableButtons(false);
+    enableInputs(true);
+    return false;
+}
+
 
 function showLists(){
-    let result = `<ul>`;
-    lists.forEach((statement, index) => {
+    let result = "";
+    lists.forEach((statement) => {
         result += `<li>${statement.name} ${statement.predicate}: ${statement.list}</li>`;
     });
-    document.body.innerHTML += result + `</ul>`;
+    document.getElementById("list").innerHTML = result;
 }
 
 function getNeighbors(_name, _predicate){
@@ -70,21 +116,52 @@ function getNeighbors(_name, _predicate){
                 result.push(graph.edges[object][_predicate])
             }
         }
-        lists.push({name: _name, predicate: _predicate, list: result})
-
+        if (result.length){
+            lists.push({name: _name, predicate: _predicate, list: result})
+        }
         const error = false;
         if (error){
-            reject("Error")
+            reject(console.log("Rejected"));
         } else {
             resolve();
         }
     });
 }
 
-//document.body.innerHTML += getNeighbors("Adam", "lubi");
-//document.body.innerHTML += getNeighbors("Carrie", "nepozna");
-//document.body.innerHTML += getNeighbors("Sindibad", "lubi");
+// -------------------------- INTEGRATION TEST ---------------------------------
 
-getNeighbors("Felicity", "lubi").then(showLists);
 
-//showLists();
+testBtn.onclick = () => {
+    //test 1
+    document.getElementById("testMessage").innerHTML = "";
+    lists = [];
+    getNeighbors("Adam", "lubi");
+    getNeighbors("Bob", "nepozna");
+    getNeighbors("Jerry", "lubi");
+    if (lists[0].list[0] != "Felicity" || lists[0].list[1] != "Hannah" || lists[0].list[2] != "Bob"
+        || lists[1].list[0] != "Carrie"
+        || lists[2].list[0] != "Bob" || lists[2].list[1] != "Donnovan" || lists[2].list[2] != "Sindibad"){
+            document.getElementById("testMessage").innerHTML += "TEST 1 FAILED: OK<br>";
+    } else {
+        document.getElementById("testMessage").innerHTML += "TEST 1: OK<br>";
+    }
+    // test 2
+    lists = [];
+    document.getElementById("nodeInput").value = "Adam";
+    document.getElementById("edgeInput").value = "lubi";
+    okBtn.click();
+    rejectBtn.click();
+    if (document.getElementById("message").innerHTML != "node info: Adam has 5 neighbors. Do you wish to confirm your action?"
+        || lists.length){
+            document.getElementById("testMessage").innerHTML += "TEST 2: FAILED<br>";
+        } else {
+            document.getElementById("testMessage").innerHTML += "TEST 2: OK<br>";
+        }
+    // test 3
+    getNeighbors("Filip", "nepozna");
+    if (lists.length){
+        document.getElementById("testMessage").innerHTML += "TEST 3: FAILED<br>";
+    } else {
+        document.getElementById("testMessage").innerHTML += "TEST 3: OK<br>";
+    }
+}
