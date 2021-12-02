@@ -1,3 +1,5 @@
+// --------------------------- EMULATOR --------------------------------
+
 var graph = {
     nodes: [
     "Adam",
@@ -45,6 +47,32 @@ var graph = {
     ]
 };
 
+function getNeighbors(_name, _predicate, time){
+    return new Promise((resolve, reject)=> {
+        setTimeout(() => {
+            let result = [];
+            for (let object in graph.edges){
+                if (graph.edges[object].name === _name && graph.edges[object][_predicate]){
+                    result.push(graph.edges[object][_predicate])
+                }
+            }
+            if (result.length){
+                //lists.push({name: _name, predicate: _predicate, list: result});
+                lists.push({name: _name, predicate: _predicate, list: result});
+            }
+            const error = false;
+            if (error){
+                reject(console.log("Rejected"));
+            } else {
+                resolve();
+            }
+        }, time); //for testing set 3000 i.e.
+    });
+    
+}
+
+// --------------------------- APP --------------------------------
+
 var lists = [];
 var confirmBtn = document.getElementById("confirm");
 var rejectBtn = document.getElementById("reject");
@@ -90,7 +118,7 @@ confirmBtn.onclick = async () => {
     var edge = document.getElementById("edgeInput").value;
     enableButtons(false);
     enableInputs(true);
-    await getNeighbors(node, edge);
+    await getNeighbors(node, edge, 0);
     showLists();
     
     return true;
@@ -111,30 +139,6 @@ function showLists(){
     document.getElementById("list").innerHTML = result;
 }
 
-function getNeighbors(_name, _predicate){
-    return new Promise((resolve, reject)=> {
-        setTimeout(() => {
-            let result = [];
-            for (let object in graph.edges){
-                if (graph.edges[object].name === _name && graph.edges[object][_predicate]){
-                    result.push(graph.edges[object][_predicate])
-                }
-            }
-            if (result.length){
-                //lists.push({name: _name, predicate: _predicate, list: result});
-                lists.push({name: _name, predicate: _predicate, list: result});
-            }
-            const error = false;
-            if (error){
-                reject(console.log("Rejected"));
-            } else {
-                resolve();
-            }
-        }, 5000); //for testing set 3000 i.e.
-    });
-    
-}
-
 // -------------------------- INTEGRATION TEST ---------------------------------
 
 
@@ -144,9 +148,9 @@ testBtn.onclick = async () => {
     document.getElementById("ok").disabled = true;
     enableButtons(false);
     lists = [];
-    await getNeighbors("Adam", "lubi");
-    await getNeighbors("Bob", "nepozna");
-    await getNeighbors("Jerry", "lubi");
+    await getNeighbors("Adam", "lubi", 1000); //we simulate 1sec.delay of device
+    await getNeighbors("Bob", "nepozna", 1000); //we simulate 1sec.delay of device
+    await getNeighbors("Jerry", "lubi", 1000); //we simulate 1sec.delay of device
     if (lists[0].list[0] != "Felicity" || lists[0].list[1] != "Hannah" || lists[0].list[2] != "Bob"
         || lists[1].list[0] != "Carrie"
         || lists[2].list[0] != "Bob" || lists[2].list[1] != "Donovan" || lists[2].list[2] != "Sindibad"){
@@ -171,16 +175,16 @@ testBtn.onclick = async () => {
         } else {
             document.getElementById("testMessage").innerHTML += "TEST 2: OK<br>";
         }
+    document.getElementById("nodeInput").value = "";
+    document.getElementById("edgeInput").value = "";
+    document.getElementById("message").innerHTML = "";
     // test 3
-    getNeighbors("Filip", "nepozna");
+    await getNeighbors("Filip", "nepozna", 1000); //we simulate 1sec.delay of device
     if (lists.length){
         document.getElementById("testMessage").innerHTML += "TEST 3: FAILED<br>";
     } else {
         document.getElementById("testMessage").innerHTML += "TEST 3: OK<br>";
     }
-    document.getElementById("nodeInput").value = "";
-    document.getElementById("edgeInput").value = "";
-    document.getElementById("message").innerHTML = "";
     document.getElementById("ok").disabled = false;
     enableButtons(true);
 }
