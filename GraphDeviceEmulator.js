@@ -29,7 +29,7 @@ var graph = {
         {name: "Hannah", lubi: "Adam"},
         {name: "Iris", lubi: "Eddward"},
         {name: "Jerry", lubi: "Bob"},
-        {name: "Jerry", lubi: "Donnovan"},
+        {name: "Jerry", lubi: "Donovan"},
         {name: "Jerry", lubi: "Sindibad"},
         {name: "Nada", lubi: "Sindibad"},
         {name: "Sindibad", lubi: "Nada"},
@@ -85,10 +85,11 @@ okBtn.onclick = () => {
     }
 }
 
-confirmBtn.onclick = () => {
+confirmBtn.onclick = async () => {
     var node = document.getElementById("nodeInput").value;
     var edge = document.getElementById("edgeInput").value;
-    getNeighbors(node, edge).then(showLists);
+    await getNeighbors(node, edge);
+    showLists();
     enableButtons(false);
     enableInputs(true);
     return true;
@@ -103,45 +104,50 @@ rejectBtn.onclick = () => {
 function showLists(){
     let result = "";
     lists.forEach((statement) => {
-        result += `<li>${statement.name} ${statement.predicate}: ${statement.list}</li>`;
+        result = `<li>${statement.name} ${statement.predicate}: ${statement.list}</li>` + result;
+        // we want newer statements on the top
     });
     document.getElementById("list").innerHTML = result;
 }
 
 function getNeighbors(_name, _predicate){
     return new Promise((resolve, reject)=> {
-        let result = [];
-        for (let object in graph.edges){
-            if (graph.edges[object].name === _name && graph.edges[object][_predicate]){
-                result.push(graph.edges[object][_predicate])
+        setTimeout(() => {
+            let result = [];
+            for (let object in graph.edges){
+                if (graph.edges[object].name === _name && graph.edges[object][_predicate]){
+                    result.push(graph.edges[object][_predicate])
+                }
             }
-        }
-        if (result.length){
-            lists.push({name: _name, predicate: _predicate, list: result})
-        }
-        const error = false;
-        if (error){
-            reject(console.log("Rejected"));
-        } else {
-            resolve();
-        }
+            if (result.length){
+                //lists.push({name: _name, predicate: _predicate, list: result});
+                lists.push({name: _name, predicate: _predicate, list: result});
+            }
+            const error = false;
+            if (error){
+                reject(console.log("Rejected"));
+            } else {
+                resolve();
+            }
+        }, 1); //for testing set 3000 i.e.
     });
+    
 }
 
 // -------------------------- INTEGRATION TEST ---------------------------------
 
 
-testBtn.onclick = () => {
+testBtn.onclick = async () => {
     //test 1
     document.getElementById("testMessage").innerHTML = "";
     lists = [];
-    getNeighbors("Adam", "lubi");
-    getNeighbors("Bob", "nepozna");
-    getNeighbors("Jerry", "lubi");
+    await getNeighbors("Adam", "lubi");
+    await getNeighbors("Bob", "nepozna");
+    await getNeighbors("Jerry", "lubi");
     if (lists[0].list[0] != "Felicity" || lists[0].list[1] != "Hannah" || lists[0].list[2] != "Bob"
         || lists[1].list[0] != "Carrie"
-        || lists[2].list[0] != "Bob" || lists[2].list[1] != "Donnovan" || lists[2].list[2] != "Sindibad"){
-            document.getElementById("testMessage").innerHTML += "TEST 1 FAILED: OK<br>";
+        || lists[2].list[0] != "Bob" || lists[2].list[1] != "Donovan" || lists[2].list[2] != "Sindibad"){
+            document.getElementById("testMessage").innerHTML += "TEST 1: FAILED<br>";
     } else {
         document.getElementById("testMessage").innerHTML += "TEST 1: OK<br>";
     }
@@ -164,4 +170,7 @@ testBtn.onclick = () => {
     } else {
         document.getElementById("testMessage").innerHTML += "TEST 3: OK<br>";
     }
+    document.getElementById("nodeInput").value = "";
+    document.getElementById("edgeInput").value = "";
+    document.getElementById("message").innerHTML = "";
 }
