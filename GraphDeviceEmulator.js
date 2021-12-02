@@ -88,10 +88,11 @@ okBtn.onclick = () => {
 confirmBtn.onclick = async () => {
     var node = document.getElementById("nodeInput").value;
     var edge = document.getElementById("edgeInput").value;
-    await getNeighbors(node, edge);
-    showLists();
     enableButtons(false);
     enableInputs(true);
+    await getNeighbors(node, edge);
+    showLists();
+    
     return true;
 }
 rejectBtn.onclick = () => {
@@ -129,7 +130,7 @@ function getNeighbors(_name, _predicate){
             } else {
                 resolve();
             }
-        }, 1); //for testing set 3000 i.e.
+        }, 5000); //for testing set 3000 i.e.
     });
     
 }
@@ -140,6 +141,8 @@ function getNeighbors(_name, _predicate){
 testBtn.onclick = async () => {
     //test 1
     document.getElementById("testMessage").innerHTML = "";
+    document.getElementById("ok").disabled = true;
+    enableButtons(false);
     lists = [];
     await getNeighbors("Adam", "lubi");
     await getNeighbors("Bob", "nepozna");
@@ -155,8 +158,13 @@ testBtn.onclick = async () => {
     lists = [];
     document.getElementById("nodeInput").value = "Adam";
     document.getElementById("edgeInput").value = "lubi";
+    document.getElementById("ok").disabled = false;
+    enableButtons(true);
     okBtn.click();
     rejectBtn.click();
+    document.getElementById("ok").disabled = true;
+    enableButtons(false);
+
     if (document.getElementById("message").innerHTML != "node info: Adam has 5 neighbors. Do you wish to confirm your action?"
         || lists.length){
             document.getElementById("testMessage").innerHTML += "TEST 2: FAILED<br>";
@@ -173,4 +181,6 @@ testBtn.onclick = async () => {
     document.getElementById("nodeInput").value = "";
     document.getElementById("edgeInput").value = "";
     document.getElementById("message").innerHTML = "";
+    document.getElementById("ok").disabled = false;
+    enableButtons(true);
 }
